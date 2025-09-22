@@ -53,16 +53,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </p>
         </div>
 
-        <div className="flex gap-1.5 px-1">
-          <Button variant="outline" size="sm" className="flex-1 text-xs px-2 py-1.5 h-8 bg-secondary/50 hover:bg-secondary hover:text-accent border-muted" onClick={handleCustomize}>
-            <Settings className="h-3 w-3 mr-1" />
-            <span className="hidden xs:inline">Customize</span>
-            <span className="xs:hidden">Custom</span>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="flex-1 bg-secondary/50 hover:bg-secondary hover:text-accent border-muted" onClick={handleCustomize}>
+            <Settings className="h-4 w-4 mr-2" />
+            Customize
           </Button>
-          <Button size="sm" className="flex-1 text-xs px-2 py-1.5 h-8 bg-gradient-accent text-white hover:opacity-90 shadow-soft" onClick={handleQuickBuy}>
-            <ShoppingCart className="h-3 w-3 mr-1" />
-            <span className="hidden xs:inline">Quick Buy</span>
-            <span className="xs:hidden">Buy</span>
+          <Button size="sm" className="flex-1 bg-gradient-accent text-white hover:opacity-90 shadow-soft" onClick={handleQuickBuy}>
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Quick Buy
           </Button>
         </div>
       </CardContent>
