@@ -78,21 +78,7 @@ const Index = () => {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
         <div className="px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-accent flex items-center justify-center">
-                <User className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {user ? `Welcome back!` : 'Welcome!'}
-                </p>
-                <p className="font-semibold">
-                  {user ? (profile?.email || 'Cake Lover') : 'Guest'}
-                </p>
-              </div>
-            </div>
-            
+          <div className="flex items-center justify-end mb-4">
             <div className="flex items-center gap-2">
               {user ? (
                 <DropdownMenu>
