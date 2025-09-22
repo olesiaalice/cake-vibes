@@ -184,7 +184,7 @@ const Index = () => {
           </h2>
         </div>
         
-        <div className="grid grid-cols-2 gap-2 sm:gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4 auto-rows-fr">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
