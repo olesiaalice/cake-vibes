@@ -176,10 +176,10 @@ const Index = () => {
                 key={category}
                 variant={selectedCategory === category || (selectedCategory === null && category === 'All') ? "default" : "outline"}
                 size="sm"
-                className="whitespace-nowrap"
+                className="whitespace-nowrap hover:opacity-90 transition-opacity"
                 style={selectedCategory === category || (selectedCategory === null && category === 'All') ? 
                   { backgroundColor: '#947050', borderColor: '#947050', color: 'white' } : 
-                  { borderColor: '#947050', color: '#947050' }
+                  { borderColor: '#947050', color: '#947050', backgroundColor: 'transparent' }
                 }
                 onClick={() => setSelectedCategory(category === 'All' ? null : category)}
               >
