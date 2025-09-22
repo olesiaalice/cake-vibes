@@ -8,35 +8,51 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Warm, Instagram-inspired cake store palette */
+    --background: 30 15% 97%;
+    --foreground: 25 25% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 28 20% 98%;
+    --card-foreground: 25 25% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 28 20% 98%;
+    --popover-foreground: 25 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 25 85% 35%;
+    --primary-foreground: 28 20% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 28 15% 92%;
+    --secondary-foreground: 25 25% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 28 12% 88%;
+    --muted-foreground: 25 15% 55%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 20 90% 65%;
+    --accent-foreground: 28 20% 98%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 28 20% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 28 20% 88%;
+    --input: 28 20% 95%;
+    --ring: 20 90% 65%;
 
-    --radius: 0.5rem;
+    /* Custom cake store colors */
+    --cake-cream: 35 25% 95%;
+    --cake-orange: 20 90% 65%;
+    --cake-brown: 25 85% 35%;
+    --cake-beige: 30 15% 90%;
+    
+    /* Gradients */
+    --gradient-warm: linear-gradient(135deg, hsl(var(--cake-cream)), hsl(var(--cake-beige)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--cake-orange)), hsl(30 80% 60%));
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(var(--cake-brown) / 0.1);
+    --shadow-card: 0 8px 30px -8px hsl(var(--cake-brown) / 0.15);
+    --shadow-floating: 0 12px 40px -12px hsl(var(--cake-brown) / 0.2);
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +116,20 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-medium;
+  }
+
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
