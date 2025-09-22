@@ -29,6 +29,9 @@ const Manager = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [storeName, setStoreName] = useState<string>('OhMyCake');
+  const [newStoreName, setNewStoreName] = useState<string>('');
+  const [isEditingStoreName, setIsEditingStoreName] = useState(false);
   const [productForm, setProductForm] = useState({
     name: '',
     description: '',
@@ -46,6 +49,7 @@ const Manager = () => {
     
     if (user && isManager) {
       fetchProducts();
+      fetchStoreName();
     }
   }, [user, isManager, loading, navigate]);
 
@@ -61,6 +65,44 @@ const Manager = () => {
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
+    }
+  };
+
+  const fetchStoreName = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('store_settings')
+        .select('store_name')
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      if (data?.store_name) {
+        setStoreName(data.store_name);
+        setNewStoreName(data.store_name);
+      }
+    } catch (error) {
+      console.error('Error fetching store name:', error);
+    }
+  };
+
+  const updateStoreName = async () => {
+    if (!newStoreName.trim()) return;
+    
+    try {
+      const { error } = await supabase
+        .from('store_settings')
+        .update({ store_name: newStoreName.trim() })
+        .eq('id', (await supabase.from('store_settings').select('id').limit(1).single()).data?.id);
+
+      if (error) throw error;
+
+      setStoreName(newStoreName.trim());
+      setIsEditingStoreName(false);
+      toast.success('Store name updated successfully');
+    } catch (error) {
+      console.error('Error updating store name:', error);
+      toast.error('Failed to update store name');
     }
   };
 
@@ -287,6 +329,7 @@ const Manager = () => {
           <TabsList>
             <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
           
           <TabsContent value="products" className="space-y-6">
@@ -463,6 +506,58 @@ const Manager = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Store Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="store-name">Store Name</Label>
+                  <div className="flex gap-2">
+                    {isEditingStoreName ? (
+                      <>
+                        <Input
+                          id="store-name"
+                          value={newStoreName}
+                          onChange={(e) => setNewStoreName(e.target.value)}
+                          placeholder="Enter store name"
+                        />
+                        <Button onClick={updateStoreName} disabled={!newStoreName.trim()}>
+                          Save
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => {
+                            setIsEditingStoreName(false);
+                            setNewStoreName(storeName);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Input
+                          value={storeName}
+                          disabled
+                          className="flex-1"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsEditingStoreName(true)}
+                        >
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

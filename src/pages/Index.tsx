@@ -28,9 +28,11 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [storeName, setStoreName] = useState<string>('OhMyCake');
 
   useEffect(() => {
     fetchProducts();
+    fetchStoreName();
   }, []);
 
   const fetchProducts = async () => {
@@ -48,6 +50,23 @@ const Index = () => {
       toast.error('Failed to load products');
     } finally {
       setLoadingProducts(false);
+    }
+  };
+
+  const fetchStoreName = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('store_settings')
+        .select('store_name')
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      if (data?.store_name) {
+        setStoreName(data.store_name);
+      }
+    } catch (error) {
+      console.error('Error fetching store name:', error);
     }
   };
 
@@ -78,7 +97,12 @@ const Index = () => {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
         <div className="px-4 py-4">
-          <div className="flex items-center justify-end mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-bold text-foreground">
+                {storeName}
+              </h1>
+            </div>
             <div className="flex items-center gap-2">
               {user ? (
                 <DropdownMenu>
