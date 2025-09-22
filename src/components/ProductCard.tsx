@@ -52,7 +52,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <h3 className="font-semibold text-sm sm:text-lg text-foreground mb-1 line-clamp-1">
             {product.name}
           </h3>
-          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2">
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2 hidden sm:block">
             {product.description}
           </p>
           <p className="text-lg sm:text-xl font-bold text-accent">
