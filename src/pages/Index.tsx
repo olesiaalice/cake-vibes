@@ -177,6 +177,10 @@ const Index = () => {
                 variant={selectedCategory === category || (selectedCategory === null && category === 'All') ? "default" : "outline"}
                 size="sm"
                 className="whitespace-nowrap"
+                style={selectedCategory === category || (selectedCategory === null && category === 'All') ? 
+                  { backgroundColor: '#947050', borderColor: '#947050', color: 'white' } : 
+                  { borderColor: '#947050', color: '#947050' }
+                }
                 onClick={() => setSelectedCategory(category === 'All' ? null : category)}
               >
                 {category}
