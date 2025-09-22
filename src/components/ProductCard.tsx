@@ -1,9 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, ShoppingCart, Settings } from 'lucide-react';
+import { ShoppingCart, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types/product';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from '@/hooks/use-toast';
@@ -46,13 +45,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           alt={product.name}
           className="w-full h-32 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <Badge className="absolute top-3 right-3 bg-background/90 text-foreground backdrop-blur-sm">
-          <Star className="h-3 w-3 mr-1 fill-accent text-accent" />
-          {product.rating}
-        </Badge>
-        <Badge className="absolute top-3 left-3 bg-accent/90 text-accent-foreground backdrop-blur-sm">
-          {product.category}
-        </Badge>
       </div>
       
       <CardContent className="p-2 sm:p-4">
