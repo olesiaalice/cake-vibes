@@ -1,20 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, Plus, Minus, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { products } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { Customization } from '@/types/product';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  rating: number;
+}
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const product = products.find(p => p.id === id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [quantity, setQuantity] = useState(1);
   const [customization, setCustomization] = useState<Customization>({
@@ -25,8 +36,56 @@ const ProductDetail = () => {
     specialInstructions: '',
   });
 
+  useEffect(() => {
+    if (id) {
+      fetchProduct(id);
+    }
+  }, [id]);
+
+  const fetchProduct = async (productId: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .maybeSingle();
+
+      if (error) throw error;
+      setProduct(data);
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load product details",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🎂</div>
+          <p className="text-muted-foreground">Loading cake details...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
-    return <div className="min-h-screen flex items-center justify-center">Product not found</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">😞</div>
+          <h2 className="text-xl font-semibold mb-2">Product not found</h2>
+          <Button onClick={() => navigate('/')}>Back to Home</Button>
+        </div>
+      </div>
+    );
   }
 
   const toppings = ['Fresh Berries', 'Chocolate Chips', 'Nuts', 'Sprinkles', 'Caramel', 'Whipped Cream'];

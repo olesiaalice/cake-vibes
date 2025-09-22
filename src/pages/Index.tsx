@@ -1,27 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User } from 'lucide-react';
+import { Search, ShoppingCart, User, LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ProductCard from '@/components/ProductCard';
-import { products } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  rating: number;
+}
 
 const Index = () => {
   const navigate = useNavigate();
   const { getTotalItems } = useCart();
+  const { user, profile, signOut, isManager, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Failed to load products');
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
 
   const categories = ['All', ...Array.from(new Set(products.map(p => p.category)))];
-  
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = !selectedCategory || selectedCategory === 'All' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  if (loading || loadingProducts) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🎂</div>
+          <p className="text-muted-foreground">Loading delicious cakes...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-warm">
@@ -34,23 +87,69 @@ const Index = () => {
                 <User className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Welcome back!</p>
-                <p className="font-semibold">Cake Lover</p>
+                <p className="text-sm text-muted-foreground">
+                  {user ? `Welcome back!` : 'Welcome!'}
+                </p>
+                <p className="font-semibold">
+                  {user ? (profile?.email || 'Cake Lover') : 'Guest'}
+                </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="relative rounded-full"
-              onClick={() => navigate('/basket')}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {getTotalItems() > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-accent text-white text-xs">
-                  {getTotalItems()}
-                </Badge>
+            
+            <div className="flex items-center gap-2">
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="rounded-full">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem disabled>
+                      <span className="text-sm text-muted-foreground">
+                        {profile?.email}
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {isManager && (
+                      <>
+                        <DropdownMenuItem onClick={() => navigate('/manager')}>
+                          <Shield className="mr-2 h-4 w-4" />
+                          Manager Dashboard
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/auth')}
+                >
+                  Sign In
+                </Button>
               )}
-            </Button>
+              
+              <Button
+                variant="outline"
+                size="icon"
+                className="relative rounded-full"
+                onClick={() => navigate('/basket')}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {getTotalItems() > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-accent text-white text-xs">
+                    {getTotalItems()}
+                  </Badge>
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Hero Section */}
