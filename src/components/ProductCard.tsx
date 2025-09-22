@@ -72,12 +72,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <Button 
             variant="outline"
             size="sm"
-            className="flex-1 bg-secondary/50 hover:bg-secondary hover:text-accent border-muted text-xs sm:text-sm px-1 py-1 h-7 sm:h-9"
+            className="w-8 sm:flex-1 bg-secondary/50 hover:bg-secondary hover:text-accent border-muted text-xs sm:text-sm px-1 py-1 h-7 sm:h-9"
             onClick={handleCustomize}
           >
-            <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Customize</span>
-            <span className="xs:hidden">Edit</span>
+            <Settings className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Customize</span>
           </Button>
           <Button 
             size="sm"
