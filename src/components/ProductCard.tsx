@@ -44,7 +44,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-32 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <Badge className="absolute top-3 right-3 bg-background/90 text-foreground backdrop-blur-sm">
           <Star className="h-3 w-3 mr-1 fill-accent text-accent" />
@@ -55,36 +55,38 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </Badge>
       </div>
       
-      <CardContent className="p-4">
-        <div className="mb-3">
-          <h3 className="font-semibold text-lg text-foreground mb-1 line-clamp-1">
+      <CardContent className="p-2 sm:p-4">
+        <div className="mb-2 sm:mb-3">
+          <h3 className="font-semibold text-sm sm:text-lg text-foreground mb-1 line-clamp-1">
             {product.name}
           </h3>
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2">
             {product.description}
           </p>
-          <p className="text-xl font-bold text-accent">
+          <p className="text-lg sm:text-xl font-bold text-accent">
             ${product.price.toFixed(2)}
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-1 sm:gap-2">
           <Button 
             variant="outline"
             size="sm"
-            className="flex-1 bg-secondary/50 hover:bg-secondary hover:text-accent border-muted"
+            className="flex-1 bg-secondary/50 hover:bg-secondary hover:text-accent border-muted text-xs sm:text-sm px-1 py-1 h-7 sm:h-9"
             onClick={handleCustomize}
           >
-            <Settings className="h-4 w-4 mr-2" />
-            Customize
+            <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Customize</span>
+            <span className="xs:hidden">Edit</span>
           </Button>
           <Button 
             size="sm"
-            className="flex-1 bg-gradient-accent text-white hover:opacity-90 shadow-soft"
+            className="flex-1 bg-gradient-accent text-white hover:opacity-90 shadow-soft text-xs sm:text-sm px-1 py-1 h-7 sm:h-9"
             onClick={handleQuickBuy}
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Quick Buy
+            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Quick Buy</span>
+            <span className="xs:hidden">Buy</span>
           </Button>
         </div>
       </CardContent>
