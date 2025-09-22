@@ -39,13 +39,7 @@ const Manager = () => {
   });
 
   useEffect(() => {
-    console.log('Manager component - user:', user?.email);
-    console.log('Manager component - profile:', profile);
-    console.log('Manager component - isManager:', isManager);
-    console.log('Manager component - loading:', loading);
-    
     if (!loading && (!user || !isManager)) {
-      console.log('Redirecting to auth - user:', !!user, 'isManager:', isManager);
       navigate('/auth');
       return;
     }
