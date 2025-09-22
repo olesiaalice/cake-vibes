@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+
 import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -199,27 +199,7 @@ const Index = () => {
           </h2>
         </div>
         
-        {/* Mobile Carousel */}
-        <div className="sm:hidden">
-          <Carousel
-            opts={{
-              align: "start",
-              slidesToScroll: 2,
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-2">
-              {filteredProducts.map((product) => (
-                <CarouselItem key={product.id} className="pl-2 basis-1/2">
-                  <ProductCard product={product} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        </div>
-
-        {/* Desktop Grid */}
-        <div className="hidden sm:grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
