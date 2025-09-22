@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --muted: 28 12% 88%;
     --muted-foreground: 25 15% 55%;
 
-    --accent: 20 90% 65%;
+    --accent: 130 25% 55%;
     --accent-foreground: 28 20% 98%;
 
     --destructive: 0 84.2% 60.2%;
@@ -35,17 +35,17 @@ All colors MUST be HSL.
 
     --border: 28 20% 88%;
     --input: 28 20% 95%;
-    --ring: 20 90% 65%;
+    --ring: 130 25% 55%;
 
     /* Custom cake store colors */
     --cake-cream: 35 25% 95%;
-    --cake-orange: 20 90% 65%;
+    --cake-sage: 130 25% 55%;
     --cake-brown: 25 85% 35%;
     --cake-beige: 30 15% 90%;
     
     /* Gradients */
     --gradient-warm: linear-gradient(135deg, hsl(var(--cake-cream)), hsl(var(--cake-beige)));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--cake-orange)), hsl(30 80% 60%));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--cake-sage)), hsl(130 30% 65%));
     
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(var(--cake-brown) / 0.1);
