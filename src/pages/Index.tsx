@@ -113,7 +113,10 @@ const Index = () => {
                     <DropdownMenuSeparator />
                     {isManager && (
                       <>
-                        <DropdownMenuItem onClick={() => navigate('/manager')}>
+                        <DropdownMenuItem onClick={() => {
+                          console.log('Navigating to manager dashboard');
+                          navigate('/manager');
+                        }}>
                           <Shield className="mr-2 h-4 w-4" />
                           Manager Dashboard
                         </DropdownMenuItem>
