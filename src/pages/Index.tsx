@@ -164,9 +164,6 @@ const Index = () => {
             <h1 className="text-2xl font-bold text-foreground mb-2 mt-[5px]">
               Get your <span className="text-accent">Cakes</span>
             </h1>
-            <p className="text-muted-foreground">
-              on one finger tap
-            </p>
           </div>
 
           {/* Categories */}
