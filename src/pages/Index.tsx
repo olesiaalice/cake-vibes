@@ -192,11 +192,6 @@ const Index = () => {
 
       {/* Products Grid */}
       <div className="px-4 pb-6">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground">
-            Popular Cakes ({filteredProducts.length})
-          </h2>
-        </div>
         
         <div className="grid grid-cols-2 gap-2 sm:gap-4 auto-rows-fr">
           {filteredProducts.map((product) => (
