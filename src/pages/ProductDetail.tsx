@@ -175,17 +175,19 @@ const ProductDetail = () => {
             {/* Size Selection */}
             <div className="mb-6">
               <h3 className="font-semibold mb-3">Choose size</h3>
-              <div className="flex gap-3">
+              <div className="flex gap-2 w-full">
                 {['small', 'medium', 'large'].map((size) => (
                   <Button
                     key={size}
                     variant={customization.size === size ? "default" : "outline"}
-                    className="flex-1 capitalize"
+                    className="flex-1 capitalize text-xs sm:text-sm px-1 sm:px-3"
                     onClick={() => setCustomization(prev => ({ ...prev, size: size as any }))}
                   >
-                    {size}
-                    {size === 'medium' && ' (+$10)'}
-                    {size === 'large' && ' (+$20)'}
+                    <span className="block sm:inline">{size}</span>
+                    <span className="block sm:inline text-xs">
+                      {size === 'medium' && ' (+$10)'}
+                      {size === 'large' && ' (+$20)'}
+                    </span>
                   </Button>
                 ))}
               </div>
