@@ -56,6 +56,7 @@ export default {
           orange: "hsl(var(--cake-orange))",
           brown: "hsl(var(--cake-brown))",
           beige: "hsl(var(--cake-beige))",
+          accent: "hsl(var(--cake-accent))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

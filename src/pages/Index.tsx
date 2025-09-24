@@ -146,10 +146,10 @@ const Index = () => {
               <Button
                 variant="outline"
                 size="icon"
-                className="relative rounded-full bg-background/80 backdrop-blur-sm border-2 hover:bg-background shadow-card hover:shadow-floating transition-all duration-300"
+                className="relative rounded-full bg-background/80 backdrop-blur-sm border-2 border-cake-accent/30 hover:bg-background hover:border-cake-accent/50 shadow-card hover:shadow-floating transition-all duration-300"
                 onClick={() => navigate('/basket')}
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="h-5 w-5 text-cake-accent" />
                 {getTotalItems() > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-6 w-6 p-0 flex items-center justify-center bg-gradient-accent text-white text-xs shadow-glow animate-scale-in">
                     {getTotalItems()}
@@ -164,6 +164,7 @@ const Index = () => {
             <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-3 mt-[5px]">
               Get your <span className="text-gradient">Cakes</span>
             </h1>
+            <div className="w-16 h-0.5 bg-cake-accent mx-auto mb-3 rounded-full"></div>
             <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
               Handcrafted with love, delivered to your door
             </p>
