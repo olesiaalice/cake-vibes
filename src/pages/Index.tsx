@@ -29,10 +29,21 @@ const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [storeName, setStoreName] = useState<string>('OhMyCake');
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     fetchProducts();
     fetchStoreName();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const fetchProducts = async () => {
@@ -96,10 +107,10 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-warm">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
-        <div className="px-4 py-4">
+        <div className={`px-4 transition-all duration-300 ${isScrolled ? 'py-2 md:py-4' : 'py-4'}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <h1 className="text-xl font-heading font-bold text-foreground">
+              <h1 className={`font-heading font-bold text-foreground transition-all duration-300 ${isScrolled ? 'text-lg md:text-xl' : 'text-xl'}`}>
                 {storeName}
               </h1>
             </div>
@@ -160,11 +171,11 @@ const Index = () => {
           </div>
 
           {/* Hero Section */}
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-3 mt-[5px]">
+          <div className={`text-center transition-all duration-300 ${isScrolled ? 'mb-4 md:mb-8' : 'mb-8'} ${isScrolled ? 'md:block hidden' : 'block'}`}>
+            <h1 className={`font-heading font-bold text-foreground mb-3 mt-[5px] transition-all duration-300 ${isScrolled ? 'text-2xl md:text-3xl md:sm:text-4xl' : 'text-3xl sm:text-4xl'}`}>
               Get your <span className="text-gradient">Cakes</span>
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
+            <p className={`text-muted-foreground max-w-md mx-auto transition-all duration-300 ${isScrolled ? 'text-xs md:text-sm md:sm:text-base' : 'text-sm sm:text-base'}`}>
               Handcrafted with love, delivered to your door
             </p>
           </div>
