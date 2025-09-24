@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Phone, Mail, User, Package } from 'lucide-react';
-import { OrderWithItems } from '@/types/order';
+import { OrderWithItems, OrderStatus } from '@/types/order';
 import { format } from 'date-fns';
 
 interface OrderCardProps {
@@ -69,7 +69,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 ml-4">
         {/* Customer Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -150,7 +150,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
                 key={action}
                 variant="outline"
                 size="sm"
-                onClick={() => onUpdateStatus(order.id, action)}
+                onClick={() => onUpdateStatus(order.id, action as OrderStatus)}
                 className="capitalize"
               >
                 Mark as {action}
