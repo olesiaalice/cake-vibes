@@ -69,7 +69,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 ml-4">
+      <CardContent className="space-y-4 mx-4">
         {/* Customer Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
