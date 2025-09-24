@@ -11,7 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Pencil, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { Pencil, Plus, Trash2, ArrowLeft, ShoppingBag, Package, TrendingUp, Clock } from 'lucide-react';
+import { OrderWithItems, OrderStatus } from '@/types/order';
+import OrderCard from '@/components/OrderCard';
 
 interface Product {
   id: string;
@@ -27,11 +29,14 @@ const Manager = () => {
   const { user, profile, isManager, loading } = useAuth();
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<OrderWithItems[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [storeName, setStoreName] = useState<string>('OhMyCake');
   const [newStoreName, setNewStoreName] = useState<string>('');
   const [isEditingStoreName, setIsEditingStoreName] = useState(false);
+  const [activeTab, setActiveTab] = useState('orders');
   const [productForm, setProductForm] = useState({
     name: '',
     description: '',
@@ -50,6 +55,7 @@ const Manager = () => {
     if (user && isManager) {
       fetchProducts();
       fetchStoreName();
+      fetchOrders();
     }
   }, [user, isManager, loading, navigate]);
 
@@ -65,6 +71,50 @@ const Manager = () => {
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      setLoadingOrders(true);
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            *,
+            products (
+              name,
+              image
+            )
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      toast.error('Failed to fetch orders');
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      
+      toast.success(`Order status updated to ${status}`);
+      fetchOrders(); // Refresh orders
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast.error('Failed to update order status');
     }
   };
 
@@ -325,12 +375,110 @@ const Manager = () => {
           </Dialog>
         </div>
 
-        <Tabs defaultValue="products" className="w-full">
-          <TabsList>
-            <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4" />
+              Orders
+            </TabsTrigger>
+            <TabsTrigger value="products" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Products ({products.length})
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="orders" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Orders</p>
+                      <p className="text-2xl font-bold">{orders.length}</p>
+                    </div>
+                    <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pending</p>
+                      <p className="text-2xl font-bold text-yellow-600">
+                        {orders.filter(o => o.status === 'pending').length}
+                      </p>
+                    </div>
+                    <Clock className="h-8 w-8 text-yellow-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Preparing</p>
+                      <p className="text-2xl font-bold text-orange-600">
+                        {orders.filter(o => o.status === 'preparing').length}
+                      </p>
+                    </div>
+                    <Package className="h-8 w-8 text-orange-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Revenue</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        ${orders.reduce((sum, order) => sum + Number(order.total_amount), 0).toFixed(2)}
+                      </p>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Recent Orders</h3>
+                <Button variant="outline" onClick={fetchOrders}>
+                  Refresh
+                </Button>
+              </div>
+              
+              {loadingOrders ? (
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground">Loading orders...</div>
+                </div>
+              ) : orders.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">📦</div>
+                  <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
+                  <p className="text-muted-foreground">
+                    Orders will appear here when customers place them.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {orders.map((order) => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      onUpdateStatus={updateOrderStatus}
+                      showActions={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
           
           <TabsContent value="products" className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -474,39 +622,6 @@ const Manager = () => {
               ))}
             </div>
           </TabsContent>
-          
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Total Products</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{products.length}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Average Price</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">
-                    ${products.length > 0 ? (products.reduce((sum, p) => sum + p.price, 0) / products.length).toFixed(2) : '0.00'}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Categories</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">
-                    {new Set(products.map(p => p.category)).size}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
             <Card>
@@ -517,15 +632,15 @@ const Manager = () => {
                 <div className="space-y-2">
                   <Label htmlFor="store-name">Store Name</Label>
                   <div className="flex gap-2">
+                    <Input
+                      id="store-name"
+                      value={newStoreName}
+                      onChange={(e) => setNewStoreName(e.target.value)}
+                      disabled={!isEditingStoreName}
+                    />
                     {isEditingStoreName ? (
-                      <>
-                        <Input
-                          id="store-name"
-                          value={newStoreName}
-                          onChange={(e) => setNewStoreName(e.target.value)}
-                          placeholder="Enter store name"
-                        />
-                        <Button onClick={updateStoreName} disabled={!newStoreName.trim()}>
+                      <div className="flex gap-2">
+                        <Button onClick={updateStoreName} size="sm">
                           Save
                         </Button>
                         <Button 
@@ -534,25 +649,19 @@ const Manager = () => {
                             setIsEditingStoreName(false);
                             setNewStoreName(storeName);
                           }}
+                          size="sm"
                         >
                           Cancel
                         </Button>
-                      </>
+                      </div>
                     ) : (
-                      <>
-                        <Input
-                          value={storeName}
-                          disabled
-                          className="flex-1"
-                        />
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsEditingStoreName(true)}
-                        >
-                          <Pencil className="h-4 w-4 mr-2" />
-                          Edit
-                        </Button>
-                      </>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setIsEditingStoreName(true)}
+                        size="sm"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                     )}
                   </div>
                 </div>

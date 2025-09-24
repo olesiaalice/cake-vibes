@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { CartItem, Product, Customization } from '@/types/product';
+import { CreateOrderData } from '@/types/order';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './AuthContext';
+import { toast } from 'sonner';
 
 interface CartContextType {
   items: CartItem[];
@@ -9,6 +13,7 @@ interface CartContextType {
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  placeOrder: (orderData: CreateOrderData) => Promise<{ success: boolean; orderId?: string; error?: string }>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,6 +32,7 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const { user } = useAuth();
 
   const addToCart = (product: Product, quantity = 1, customization?: Customization) => {
     const basePrice = product.price;
@@ -115,6 +121,62 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     return price;
   };
 
+  const placeOrder = async (orderData: CreateOrderData) => {
+    if (!user) {
+      return { success: false, error: 'User must be logged in to place an order' };
+    }
+
+    if (items.length === 0) {
+      return { success: false, error: 'Cart is empty' };
+    }
+
+    try {
+      const total = getTotalPrice();
+
+      // Create the order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          total_amount: total,
+          customer_name: orderData.customer_name,
+          customer_email: orderData.customer_email,
+          customer_phone: orderData.customer_phone,
+          delivery_address: orderData.delivery_address,
+          delivery_date: orderData.delivery_date,
+          special_instructions: orderData.special_instructions,
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items
+      const orderItems = items.map(item => ({
+        order_id: order.id,
+        product_id: item.product.id,
+        quantity: item.quantity,
+        price_per_item: item.totalPrice / item.quantity,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      // Clear cart after successful order
+      clearCart();
+      toast.success('Order placed successfully!');
+      return { success: true, orderId: order.id };
+
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('Failed to place order. Please try again.');
+      return { success: false, error: 'Failed to place order' };
+    }
+  };
+
   return (
     <CartContext.Provider value={{
       items,
@@ -123,7 +185,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       updateQuantity,
       clearCart,
       getTotalItems,
-      getTotalPrice
+      getTotalPrice,
+      placeOrder
     }}>
       {children}
     </CartContext.Provider>

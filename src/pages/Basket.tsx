@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Minus, Calendar, CreditCard } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Calendar, MapPin, User, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,58 +9,67 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useCart } from '@/contexts/CartContext';
-import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const Basket = () => {
   const navigate = useNavigate();
-  const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();
+  const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart, placeOrder } = useCart();
+  const { user, profile } = useAuth();
   const [deliveryDate, setDeliveryDate] = useState<Date>();
-  const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    holderName: ''
+  const [orderData, setOrderData] = useState({
+    customer_name: profile?.email || '',
+    customer_email: profile?.email || '',
+    customer_phone: '',
+    delivery_address: '',
+    special_instructions: ''
   });
-  const [specialNotes, setSpecialNotes] = useState('');
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
+    if (!user) {
+      toast.error('Please sign in to place an order');
+      navigate('/auth');
+      return;
+    }
+
     if (items.length === 0) {
-      toast({
-        title: "Empty basket",
-        description: "Please add some items to your basket first.",
-        variant: "destructive"
-      });
+      toast.error('Please add some items to your basket first');
       return;
     }
 
     if (!deliveryDate) {
-      toast({
-        title: "Delivery date required",
-        description: "Please select a delivery date.",
-        variant: "destructive"
-      });
+      toast.error('Please select a delivery date');
       return;
     }
 
-    if (!paymentInfo.cardNumber || !paymentInfo.expiryDate || !paymentInfo.cvv || !paymentInfo.holderName) {
-      toast({
-        title: "Payment information required",
-        description: "Please fill in all payment details.",
-        variant: "destructive"
-      });
+    if (!orderData.customer_name || !orderData.customer_email) {
+      toast.error('Please fill in your name and email');
       return;
     }
 
-    // Simulate order processing
-    toast({
-      title: "Order placed successfully!",
-      description: "Your delicious cakes will be delivered on " + format(deliveryDate, 'PPP'),
-    });
+    setIsPlacingOrder(true);
 
-    clearCart();
-    navigate('/');
+    try {
+      const result = await placeOrder({
+        ...orderData,
+        delivery_date: deliveryDate.toISOString(),
+      });
+
+      if (result.success) {
+        toast.success('Order placed successfully! Your delicious cakes will be delivered on ' + format(deliveryDate, 'PPP'));
+        navigate('/');
+      } else {
+        toast.error(result.error || 'Failed to place order');
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   if (items.length === 0) {
@@ -172,6 +181,67 @@ const Basket = () => {
           ))}
         </div>
 
+        {/* Customer Information */}
+        <Card className="mb-6 shadow-soft">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Customer Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="customerName">Full Name</Label>
+              <Input
+                id="customerName"
+                placeholder="Your full name"
+                value={orderData.customer_name}
+                onChange={(e) => setOrderData(prev => ({ ...prev, customer_name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="customerEmail">Email</Label>
+              <Input
+                id="customerEmail"
+                type="email"
+                placeholder="your.email@example.com"
+                value={orderData.customer_email}
+                onChange={(e) => setOrderData(prev => ({ ...prev, customer_email: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="customerPhone">Phone (Optional)</Label>
+              <Input
+                id="customerPhone"
+                placeholder="+1 (555) 123-4567"
+                value={orderData.customer_phone}
+                onChange={(e) => setOrderData(prev => ({ ...prev, customer_phone: e.target.value }))}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Delivery Information */}
+        <Card className="mb-6 shadow-soft">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Delivery Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="deliveryAddress">Delivery Address (Optional)</Label>
+              <Textarea
+                id="deliveryAddress"
+                placeholder="Enter your delivery address..."
+                value={orderData.delivery_address}
+                onChange={(e) => setOrderData(prev => ({ ...prev, delivery_address: e.target.value }))}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Delivery Date */}
         <Card className="mb-6 shadow-soft">
           <CardHeader>
@@ -208,66 +278,16 @@ const Basket = () => {
           </CardContent>
         </Card>
 
-        {/* Payment Information */}
+        {/* Special Instructions */}
         <Card className="mb-6 shadow-soft">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              Payment Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="holderName">Cardholder Name</Label>
-              <Input
-                id="holderName"
-                placeholder="John Doe"
-                value={paymentInfo.holderName}
-                onChange={(e) => setPaymentInfo(prev => ({ ...prev, holderName: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                placeholder="1234 5678 9012 3456"
-                value={paymentInfo.cardNumber}
-                onChange={(e) => setPaymentInfo(prev => ({ ...prev, cardNumber: e.target.value }))}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="expiryDate">Expiry Date</Label>
-                <Input
-                  id="expiryDate"
-                  placeholder="MM/YY"
-                  value={paymentInfo.expiryDate}
-                  onChange={(e) => setPaymentInfo(prev => ({ ...prev, expiryDate: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  placeholder="123"
-                  value={paymentInfo.cvv}
-                  onChange={(e) => setPaymentInfo(prev => ({ ...prev, cvv: e.target.value }))}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Special Notes */}
-        <Card className="mb-6 shadow-soft">
-          <CardHeader>
-            <CardTitle>Special Notes</CardTitle>
+            <CardTitle>Special Instructions</CardTitle>
           </CardHeader>
           <CardContent>
             <Textarea
               placeholder="Any additional notes or special requests..."
-              value={specialNotes}
-              onChange={(e) => setSpecialNotes(e.target.value)}
+              value={orderData.special_instructions}
+              onChange={(e) => setOrderData(prev => ({ ...prev, special_instructions: e.target.value }))}
             />
           </CardContent>
         </Card>
@@ -294,9 +314,10 @@ const Basket = () => {
 
             <Button
               onClick={handlePlaceOrder}
-              className="w-full py-6 text-lg font-semibold bg-gradient-accent text-white rounded-xl shadow-floating"
+              disabled={isPlacingOrder}
+              className="w-full py-6 text-lg font-semibold bg-gradient-accent text-white rounded-xl shadow-floating disabled:opacity-50"
             >
-              Place Order
+              {isPlacingOrder ? 'Placing Order...' : 'Place Order'}
             </Button>
           </CardContent>
         </Card>
