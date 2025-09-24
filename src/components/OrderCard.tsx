@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Phone, Mail, User, Package } from 'lucide-react';
-import { OrderWithItems, OrderStatus } from '@/types/order';
 import { format } from 'date-fns';
+import type { OrderWithItems, OrderStatus } from '@/types/order';
 
 interface OrderCardProps {
   order: OrderWithItems;
