@@ -138,7 +138,7 @@ const ProductDetail = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className="rounded-full"
           >
             <ArrowLeft className="h-5 w-5" />
