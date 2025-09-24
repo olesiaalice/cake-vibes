@@ -42,7 +42,6 @@ All colors MUST be HSL.
     --cake-sage: 28 30% 45%;
     --cake-brown: 25 85% 35%;
     --cake-beige: 30 15% 90%;
-    --cake-accent: 180 10% 42%;
     
     /* Gradients */
     --gradient-warm: linear-gradient(135deg, hsl(var(--cake-cream)), hsl(var(--cake-beige)));
