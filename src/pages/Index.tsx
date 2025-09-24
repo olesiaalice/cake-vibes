@@ -99,7 +99,7 @@ const Index = () => {
         <div className="px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <h1 className="text-xl font-bold text-foreground">
+              <h1 className="text-xl font-heading font-bold text-foreground">
                 {storeName}
               </h1>
             </div>
@@ -146,12 +146,12 @@ const Index = () => {
               <Button
                 variant="outline"
                 size="icon"
-                className="relative rounded-full"
+                className="relative rounded-full bg-background/80 backdrop-blur-sm border-2 hover:bg-background shadow-card hover:shadow-floating transition-all duration-300"
                 onClick={() => navigate('/basket')}
               >
                 <ShoppingCart className="h-5 w-5" />
                 {getTotalItems() > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-accent text-white text-xs">
+                  <Badge className="absolute -top-2 -right-2 h-6 w-6 p-0 flex items-center justify-center bg-gradient-accent text-white text-xs shadow-glow animate-scale-in">
                     {getTotalItems()}
                   </Badge>
                 )}
@@ -160,10 +160,13 @@ const Index = () => {
           </div>
 
           {/* Hero Section */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-foreground mb-2 mt-[5px]">
-              Get your <span className="text-accent">Cakes</span>
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-3 mt-[5px]">
+              Get your <span className="text-gradient">Cakes</span>
             </h1>
+            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
+              Handcrafted with love, delivered to your door
+            </p>
           </div>
 
           {/* Categories */}
@@ -190,18 +193,18 @@ const Index = () => {
       {/* Products Grid */}
       <div className="px-4 pb-6">
         
-        <div className="grid grid-cols-2 gap-2 sm:gap-4 auto-rows-fr">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 auto-rows-fr animate-in fade-in-0 duration-500">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
 
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
+        {filteredProducts.length === 0 && !loadingProducts && (
+          <div className="text-center py-12 animate-fade-in">
             <div className="text-6xl mb-4">🎂</div>
-            <h3 className="text-lg font-semibold mb-2">No cakes found</h3>
+            <h3 className="text-lg font-playfair font-semibold mb-2">No cakes found</h3>
             <p className="text-muted-foreground">
-              Try adjusting your category filter
+              Try adjusting your category filter or check back later for new delicious treats!
             </p>
           </div>
         )}

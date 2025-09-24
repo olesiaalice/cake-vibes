@@ -36,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <Card 
-      className="overflow-hidden shadow-card hover:shadow-floating transition-all duration-300 cursor-pointer group bg-card/80 backdrop-blur-sm"
+      className="overflow-hidden shadow-card hover:shadow-floating transition-all duration-300 cursor-pointer group bg-gradient-card backdrop-blur-sm border-0 hover:-translate-y-1"
       onClick={handleCardClick}
     >
       <div className="aspect-square relative">
@@ -49,13 +49,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       
       <CardContent className="p-2 sm:p-4">
         <div className="mb-2 sm:mb-3">
-          <h3 className="font-semibold text-sm sm:text-lg text-foreground mb-1 line-clamp-1">
+          <h3 className="font-playfair font-semibold text-sm sm:text-lg text-foreground mb-1 line-clamp-1">
             {product.name}
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2 hidden sm:block">
             {product.description}
           </p>
-          <p className="text-lg sm:text-xl font-bold text-accent">
+          <p className="text-lg sm:text-xl font-bold text-gradient">
             ${product.price.toFixed(2)}
           </p>
         </div>

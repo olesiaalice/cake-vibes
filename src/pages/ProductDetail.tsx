@@ -164,8 +164,8 @@ const ProductDetail = () => {
 
         {/* Product Info */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-2">{product.name}</h2>
-          <p className="text-lg font-semibold text-accent mb-2">${product.price.toFixed(2)}</p>
+          <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground mb-2">{product.name}</h2>
+          <p className="text-xl sm:text-2xl font-bold text-gradient mb-3">${product.price.toFixed(2)}</p>
           <p className="text-muted-foreground leading-relaxed">{product.description}</p>
         </div>
 
@@ -295,7 +295,7 @@ const ProductDetail = () => {
             
             <Button
               onClick={handleBuy}
-              className="w-full py-6 text-lg font-semibold bg-gradient-accent text-white rounded-xl shadow-floating"
+              className="w-full py-6 text-lg font-semibold bg-gradient-accent text-white rounded-xl shadow-floating hover:shadow-glow transition-all duration-300 hover:-translate-y-0.5"
             >
               Buy - ${calculatePrice().toFixed(2)}
             </Button>
