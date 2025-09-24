@@ -48,7 +48,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
   };
 
   return (
-    <Card className="shadow-soft hover:shadow-floating transition-all duration-300 mx-auto max-w-4xl">
+    <Card className="shadow-soft hover:shadow-floating transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
