@@ -39,11 +39,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       className="overflow-hidden shadow-card hover:shadow-floating transition-all duration-300 cursor-pointer group bg-card/80 backdrop-blur-sm"
       onClick={handleCardClick}
     >
-      <div className="relative">
+      <div className="aspect-square relative">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-32 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>
       
