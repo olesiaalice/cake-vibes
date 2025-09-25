@@ -384,10 +384,10 @@ const Manager = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Revenue</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        ${orders.reduce((sum, order) => sum + Number(order.total_amount), 0).toFixed(2)}
-                      </p>
+                       <p className="text-sm text-muted-foreground">Revenue</p>
+                       <p className="text-2xl font-bold text-green-600">
+                         ${orders.filter(order => order.status !== 'cancelled').reduce((sum, order) => sum + Number(order.total_amount), 0).toFixed(2)}
+                       </p>
                     </div>
                     <TrendingUp className="h-8 w-8 text-green-600" />
                   </div>
