@@ -7,9 +7,9 @@ import { toast } from 'sonner';
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product, quantity?: number, customization?: Customization) => void;
+  addToCart: (product: Product, quantity?: number, customization?: Customization) => Promise<void>;
   removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  updateQuantity: (productId: string, quantity: number) => Promise<void>;
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
@@ -34,9 +34,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const { user } = useAuth();
 
-  const addToCart = (product: Product, quantity = 1, customization?: Customization) => {
+  const addToCart = async (product: Product, quantity = 1, customization?: Customization) => {
     const basePrice = product.price;
-    const customizationPrice = customization ? calculateCustomizationPrice(customization) : 0;
+    const customizationPrice = customization ? await calculateCustomizationPrice(customization) : 0;
     const totalPrice = (basePrice + customizationPrice) * quantity;
 
     const cartItem: CartItem = {
@@ -67,24 +67,28 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setItems(prevItems => prevItems.filter(item => item.product.id !== productId));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = async (productId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
     }
 
-    setItems(prevItems =>
-      prevItems.map(item => {
-        if (item.product.id === productId) {
-          const basePrice = item.product.price;
-          const customizationPrice = item.customization ? calculateCustomizationPrice(item.customization) : 0;
-          const totalPrice = (basePrice + customizationPrice) * quantity;
-          
-          return { ...item, quantity, totalPrice };
-        }
-        return item;
-      })
-    );
+    for (const item of items) {
+      if (item.product.id === productId) {
+        const basePrice = item.product.price;
+        const customizationPrice = item.customization ? await calculateCustomizationPrice(item.customization) : 0;
+        const totalPrice = (basePrice + customizationPrice) * quantity;
+        
+        setItems(prevItems =>
+          prevItems.map(prevItem => 
+            prevItem.product.id === productId 
+              ? { ...prevItem, quantity, totalPrice }
+              : prevItem
+          )
+        );
+        break;
+      }
+    }
   };
 
   const clearCart = () => {
@@ -99,26 +103,59 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     return items.reduce((total, item) => total + item.totalPrice, 0);
   };
 
-  const calculateCustomizationPrice = (customization: Customization): number => {
-    let price = 0;
-    
-    // Size pricing
-    switch (customization.size) {
-      case 'small':
-        price += 0;
-        break;
-      case 'medium':
-        price += 10;
-        break;
-      case 'large':
-        price += 20;
-        break;
+  const calculateCustomizationPrice = async (customization: Customization): Promise<number> => {
+    try {
+      const { data, error } = await supabase
+        .from('customization_options')
+        .select('*')
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      let price = 0;
+      
+      // Size pricing
+      const sizeOption = data?.find(opt => 
+        opt.option_type === 'size' && 
+        opt.option_name.toLowerCase() === customization.size?.toLowerCase()
+      );
+      if (sizeOption) {
+        price += sizeOption.price_adjustment;
+      }
+      
+      // Toppings pricing
+      customization.toppings.forEach(topping => {
+        const toppingOption = data?.find(opt => 
+          opt.option_type === 'topping' && 
+          opt.option_name.toLowerCase() === topping.toLowerCase()
+        );
+        if (toppingOption) {
+          price += toppingOption.price_adjustment;
+        }
+      });
+      
+      return price;
+    } catch (error) {
+      console.error('Error calculating customization price:', error);
+      // Fallback to hardcoded pricing if database fails
+      let price = 0;
+      
+      switch (customization.size?.toLowerCase()) {
+        case 'small':
+          price += 0;
+          break;
+        case 'medium':
+          price += 10;
+          break;
+        case 'large':
+          price += 20;
+          break;
+      }
+      
+      price += customization.toppings.length * 3;
+      
+      return price;
     }
-    
-    // Toppings pricing (each topping adds $3)
-    price += customization.toppings.length * 3;
-    
-    return price;
   };
 
   const placeOrder = async (orderData: CreateOrderData) => {

@@ -42,6 +42,9 @@ const Manager = () => {
   const [minimumDeliveryDays, setMinimumDeliveryDays] = useState<number>(2);
   const [newMinimumDeliveryDays, setNewMinimumDeliveryDays] = useState<number>(2);
   const [isEditingDeliveryDays, setIsEditingDeliveryDays] = useState(false);
+  const [customizationOptions, setCustomizationOptions] = useState<any[]>([]);
+  const [editingCustomization, setEditingCustomization] = useState<any>(null);
+  const [newCustomization, setNewCustomization] = useState({ option_type: 'topping', option_name: '', price_adjustment: 0 });
   const [activeTab, setActiveTab] = useState('orders');
   const [productForm, setProductForm] = useState({
     name: '',
@@ -61,6 +64,7 @@ const Manager = () => {
       fetchStoreName();
       fetchOrders();
       fetchStoreSettings();
+      fetchCustomizationOptions();
     }
   }, [user, isManager, loading, navigate]);
   const fetchProducts = async () => {
@@ -178,6 +182,79 @@ const Manager = () => {
     } catch (error) {
       console.error('Error updating minimum delivery days:', error);
       toast.error('Failed to update minimum delivery days');
+    }
+  };
+
+  const fetchCustomizationOptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('customization_options')
+        .select('*')
+        .order('option_type')
+        .order('display_order');
+      
+      if (error) throw error;
+      setCustomizationOptions(data || []);
+    } catch (error) {
+      console.error('Error fetching customization options:', error);
+    }
+  };
+
+  const addCustomizationOption = async () => {
+    if (!newCustomization.option_name.trim()) return;
+    
+    try {
+      const { error } = await supabase
+        .from('customization_options')
+        .insert([{
+          option_type: newCustomization.option_type,
+          option_name: newCustomization.option_name.trim(),
+          price_adjustment: newCustomization.price_adjustment,
+          display_order: customizationOptions.filter(opt => opt.option_type === newCustomization.option_type).length + 1
+        }]);
+      
+      if (error) throw error;
+      toast.success('Customization option added successfully');
+      setNewCustomization({ option_type: 'topping', option_name: '', price_adjustment: 0 });
+      fetchCustomizationOptions();
+    } catch (error) {
+      console.error('Error adding customization option:', error);
+      toast.error('Failed to add customization option');
+    }
+  };
+
+  const updateCustomizationOption = async (id: string, updates: any) => {
+    try {
+      const { error } = await supabase
+        .from('customization_options')
+        .update(updates)
+        .eq('id', id);
+      
+      if (error) throw error;
+      toast.success('Customization option updated successfully');
+      setEditingCustomization(null);
+      fetchCustomizationOptions();
+    } catch (error) {
+      console.error('Error updating customization option:', error);
+      toast.error('Failed to update customization option');
+    }
+  };
+
+  const deleteCustomizationOption = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this customization option?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('customization_options')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      toast.success('Customization option deleted successfully');
+      fetchCustomizationOptions();
+    } catch (error) {
+      console.error('Error deleting customization option:', error);
+      toast.error('Failed to delete customization option');
     }
   };
   const resetForm = () => {
@@ -624,6 +701,138 @@ const Manager = () => {
                     Customers must order at least {minimumDeliveryDays} day{minimumDeliveryDays !== 1 ? 's' : ''} in advance
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Customization Options</CardTitle>
+                <p className="text-sm text-muted-foreground">Manage cake sizes, toppings, colors, and flavors with pricing</p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Add New Customization Option */}
+                <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                  <h4 className="font-medium">Add New Option</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label>Type</Label>
+                      <select 
+                        className="w-full px-3 py-2 border rounded-md text-sm"
+                        value={newCustomization.option_type}
+                        onChange={e => setNewCustomization(prev => ({...prev, option_type: e.target.value}))}
+                      >
+                        <option value="size">Size</option>
+                        <option value="topping">Topping</option>
+                        <option value="color">Color</option>
+                        <option value="flavor">Flavor</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Name</Label>
+                      <Input 
+                        value={newCustomization.option_name}
+                        onChange={e => setNewCustomization(prev => ({...prev, option_name: e.target.value}))}
+                        placeholder="e.g., Extra Large"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Price Adjustment ($)</Label>
+                      <Input 
+                        type="number"
+                        step="0.01"
+                        value={newCustomization.price_adjustment}
+                        onChange={e => setNewCustomization(prev => ({...prev, price_adjustment: parseFloat(e.target.value) || 0}))}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button onClick={addCustomizationOption} disabled={!newCustomization.option_name.trim()}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Customization Options List */}
+                {['size', 'topping', 'color', 'flavor'].map(type => (
+                  <div key={type} className="space-y-3">
+                    <h4 className="font-medium capitalize">{type}s</h4>
+                    <div className="space-y-2">
+                      {customizationOptions
+                        .filter(option => option.option_type === type)
+                        .map(option => (
+                          <div key={option.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            {editingCustomization?.id === option.id ? (
+                              <div className="flex items-center gap-4 flex-1">
+                                <Input 
+                                  value={editingCustomization.option_name}
+                                  onChange={e => setEditingCustomization(prev => ({...prev, option_name: e.target.value}))}
+                                  className="flex-1"
+                                />
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm">$</span>
+                                  <Input 
+                                    type="number"
+                                    step="0.01"
+                                    value={editingCustomization.price_adjustment}
+                                    onChange={e => setEditingCustomization(prev => ({...prev, price_adjustment: parseFloat(e.target.value) || 0}))}
+                                    className="w-20"
+                                  />
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => updateCustomizationOption(option.id, {
+                                      option_name: editingCustomization.option_name,
+                                      price_adjustment: editingCustomization.price_adjustment
+                                    })}
+                                  >
+                                    Save
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => setEditingCustomization(null)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex items-center gap-4">
+                                  <span className="font-medium">{option.option_name}</span>
+                                  <span className="text-sm text-muted-foreground">
+                                    {option.price_adjustment === 0 ? 'Free' : `+$${option.price_adjustment.toFixed(2)}`}
+                                  </span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => setEditingCustomization(option)}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="destructive"
+                                    onClick={() => deleteCustomizationOption(option.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      {customizationOptions.filter(option => option.option_type === type).length === 0 && (
+                        <p className="text-sm text-muted-foreground italic">No {type}s added yet</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </TabsContent>

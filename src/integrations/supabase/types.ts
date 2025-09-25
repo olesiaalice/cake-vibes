@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      customization_options: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          option_name: string
+          option_type: string
+          price_adjustment: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          option_name: string
+          option_type: string
+          price_adjustment?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          option_name?: string
+          option_type?: string
+          price_adjustment?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string

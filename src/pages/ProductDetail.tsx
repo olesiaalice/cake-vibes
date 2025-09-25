@@ -26,6 +26,12 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [customizationOptions, setCustomizationOptions] = useState<any>({
+    sizes: [],
+    toppings: [],
+    colors: [],
+    flavors: []
+  });
 
   const [quantity, setQuantity] = useState(1);
   const [customization, setCustomization] = useState<Customization>({
@@ -37,33 +43,71 @@ const ProductDetail = () => {
   });
 
   useEffect(() => {
+    const fetchProduct = async (productId: string) => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', productId)
+          .maybeSingle();
+
+        if (error) throw error;
+        setProduct(data);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load product details",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchCustomizationOptions = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('customization_options')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order');
+
+        if (error) throw error;
+        
+        const grouped = {
+          sizes: data?.filter(opt => opt.option_type === 'size') || [],
+          toppings: data?.filter(opt => opt.option_type === 'topping') || [],
+          colors: data?.filter(opt => opt.option_type === 'color') || [],
+          flavors: data?.filter(opt => opt.option_type === 'flavor') || []
+        };
+        
+        setCustomizationOptions(grouped);
+        
+        // Set default values based on available options
+        if (grouped.sizes.length > 0) {
+          const defaultSize = grouped.sizes.find(s => s.option_name.toLowerCase() === 'medium') || grouped.sizes[0];
+          setCustomization(prev => ({ ...prev, size: defaultSize.option_name.toLowerCase() }));
+        }
+        if (grouped.colors.length > 0) {
+          const defaultColor = grouped.colors.find(c => c.option_name.toLowerCase() === 'original') || grouped.colors[0];
+          setCustomization(prev => ({ ...prev, color: defaultColor.option_name.toLowerCase() }));
+        }
+        if (grouped.flavors.length > 0) {
+          const defaultFlavor = grouped.flavors.find(f => f.option_name.toLowerCase() === 'original') || grouped.flavors[0];
+          setCustomization(prev => ({ ...prev, flavor: defaultFlavor.option_name.toLowerCase() }));
+        }
+      } catch (error) {
+        console.error('Error fetching customization options:', error);
+      }
+    };
+
     if (id) {
       fetchProduct(id);
+      fetchCustomizationOptions();
     }
   }, [id]);
-
-  const fetchProduct = async (productId: string) => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', productId)
-        .maybeSingle();
-
-      if (error) throw error;
-      setProduct(data);
-    } catch (error) {
-      console.error('Error fetching product:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load product details",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -88,26 +132,26 @@ const ProductDetail = () => {
     );
   }
 
-  const toppings = ['Fresh Berries', 'Chocolate Chips', 'Nuts', 'Sprinkles', 'Caramel', 'Whipped Cream'];
-  const colors = ['Original', 'Pink', 'Blue', 'Yellow', 'Purple'];
-  const flavors = ['Original', 'Vanilla', 'Chocolate', 'Strawberry', 'Lemon'];
-
   const calculatePrice = () => {
     let price = product.price;
     
-    switch (customization.size) {
-      case 'small':
-        price += 0;
-        break;
-      case 'medium':
-        price += 10;
-        break;
-      case 'large':
-        price += 20;
-        break;
+    // Size pricing
+    const sizeOption = customizationOptions.sizes.find(s => 
+      s.option_name.toLowerCase() === customization.size
+    );
+    if (sizeOption) {
+      price += sizeOption.price_adjustment;
     }
     
-    price += customization.toppings.length * 3;
+    // Toppings pricing
+    customization.toppings.forEach(topping => {
+      const toppingOption = customizationOptions.toppings.find(t => 
+        t.option_name.toLowerCase() === topping.toLowerCase()
+      );
+      if (toppingOption) {
+        price += toppingOption.price_adjustment;
+      }
+    });
     
     return price * quantity;
   };
@@ -176,17 +220,16 @@ const ProductDetail = () => {
             <div className="mb-6">
               <h3 className="font-semibold mb-3">Choose size</h3>
               <div className="flex gap-2 w-full">
-                {['small', 'medium', 'large'].map((size) => (
+                {customizationOptions.sizes.map((sizeOption) => (
                   <Button
-                    key={size}
-                    variant={customization.size === size ? "default" : "outline"}
+                    key={sizeOption.id}
+                    variant={customization.size === sizeOption.option_name.toLowerCase() ? "default" : "outline"}
                     className="flex-1 capitalize text-xs sm:text-sm px-1 sm:px-3"
-                    onClick={() => setCustomization(prev => ({ ...prev, size: size as any }))}
+                    onClick={() => setCustomization(prev => ({ ...prev, size: sizeOption.option_name.toLowerCase() as any }))}
                   >
-                    <span className="block sm:inline">{size}</span>
+                    <span className="block sm:inline">{sizeOption.option_name}</span>
                     <span className="block sm:inline text-xs">
-                      {size === 'medium' && ' (+$10)'}
-                      {size === 'large' && ' (+$20)'}
+                      {sizeOption.price_adjustment > 0 && ` (+$${sizeOption.price_adjustment})`}
                     </span>
                   </Button>
                 ))}
@@ -194,56 +237,65 @@ const ProductDetail = () => {
             </div>
 
             {/* Toppings */}
-            <div className="mb-6">
-              <h3 className="font-semibold mb-3">Toppings (+$3 each)</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {toppings.map((topping) => (
-                  <Button
-                    key={topping}
-                    variant={customization.toppings.includes(topping) ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleToppingToggle(topping)}
-                    className="justify-start"
-                  >
-                    {topping}
-                  </Button>
-                ))}
+            {customizationOptions.toppings.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-semibold mb-3">Toppings</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {customizationOptions.toppings.map((toppingOption) => (
+                    <Button
+                      key={toppingOption.id}
+                      variant={customization.toppings.some(t => 
+                        t.toLowerCase() === toppingOption.option_name.toLowerCase()
+                      ) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleToppingToggle(toppingOption.option_name)}
+                      className="justify-start"
+                    >
+                      {toppingOption.option_name}
+                      {toppingOption.price_adjustment > 0 && ` (+$${toppingOption.price_adjustment})`}
+                    </Button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Color */}
-            <div className="mb-6">
-              <h3 className="font-semibold mb-3">Color</h3>
-              <div className="flex gap-2 flex-wrap">
-                {colors.map((color) => (
-                  <Button
-                    key={color}
-                    variant={customization.color === color.toLowerCase() ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCustomization(prev => ({ ...prev, color: color.toLowerCase() }))}
-                  >
-                    {color}
-                  </Button>
-                ))}
+            {customizationOptions.colors.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-semibold mb-3">Color</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {customizationOptions.colors.map((colorOption) => (
+                    <Button
+                      key={colorOption.id}
+                      variant={customization.color === colorOption.option_name.toLowerCase() ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCustomization(prev => ({ ...prev, color: colorOption.option_name.toLowerCase() }))}
+                    >
+                      {colorOption.option_name}
+                    </Button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Flavor */}
-            <div className="mb-6">
-              <h3 className="font-semibold mb-3">Flavor</h3>
-              <div className="flex gap-2 flex-wrap">
-                {flavors.map((flavor) => (
-                  <Button
-                    key={flavor}
-                    variant={customization.flavor === flavor.toLowerCase() ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCustomization(prev => ({ ...prev, flavor: flavor.toLowerCase() }))}
-                  >
-                    {flavor}
-                  </Button>
-                ))}
+            {customizationOptions.flavors.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-semibold mb-3">Flavor</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {customizationOptions.flavors.map((flavorOption) => (
+                    <Button
+                      key={flavorOption.id}
+                      variant={customization.flavor === flavorOption.option_name.toLowerCase() ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCustomization(prev => ({ ...prev, flavor: flavorOption.option_name.toLowerCase() }))}
+                    >
+                      {flavorOption.option_name}
+                    </Button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Special Instructions */}
             <div className="mb-6">

@@ -10,7 +10,7 @@ export interface Product {
 
 export interface Customization {
   toppings: string[];
-  size: 'small' | 'medium' | 'large';
+  size: string;
   color: string;
   flavor: string;
   specialInstructions?: string;
