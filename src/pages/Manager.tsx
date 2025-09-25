@@ -263,9 +263,9 @@ const Manager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background p-2 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-8 gap-4">
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
@@ -392,7 +392,7 @@ const Manager = () => {
           </TabsList>
 
           <TabsContent value="orders" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">

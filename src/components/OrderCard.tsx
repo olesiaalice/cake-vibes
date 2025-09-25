@@ -48,7 +48,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
   };
 
   return (
-    <Card className="shadow-soft hover:shadow-floating transition-all duration-300">
+    <Card className="shadow-soft hover:shadow-floating transition-all duration-300 w-full overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -69,9 +69,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 mx-4">
+      <CardContent className="space-y-4 px-2 sm:px-4">
         {/* Customer Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-muted-foreground" />
@@ -112,21 +112,21 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
           </div>
           <div className="grid gap-2">
             {order.order_items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between py-2 px-3 bg-muted/30 rounded-lg">
-                <div className="flex items-center gap-3">
+              <div key={item.id} className="flex items-center justify-between py-2 px-2 sm:px-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   <img
                     src={item.products.image}
                     alt={item.products.name}
                     className="w-10 h-10 object-cover rounded-lg"
                   />
-                  <div>
-                    <div className="font-medium text-sm">{item.products.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Qty: {item.quantity} × ${item.price_per_item.toFixed(2)}
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-sm truncate">{item.products.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Qty: {item.quantity} × ${item.price_per_item.toFixed(2)}
+                      </div>
                     </div>
-                  </div>
                 </div>
-                <div className="font-medium text-sm">
+                <div className="font-medium text-sm whitespace-nowrap">
                   ${(item.quantity * item.price_per_item).toFixed(2)}
                 </div>
               </div>
@@ -136,7 +136,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
 
         {/* Special Instructions */}
         {order.special_instructions && (
-          <div className="p-3 bg-muted/30 rounded-lg">
+          <div className="p-2 sm:p-3 bg-muted/30 rounded-lg">
             <div className="text-sm font-medium mb-1">Special Instructions:</div>
             <div className="text-sm text-muted-foreground">{order.special_instructions}</div>
           </div>
@@ -144,7 +144,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onUpdateStatus, showAction
 
         {/* Actions */}
         {showActions && onUpdateStatus && (
-          <div className="flex gap-2 pt-2">
+          <div className="flex flex-wrap gap-2 pt-2">
             {getStatusActions(order.status).map((action) => (
               <Button
                 key={action}
