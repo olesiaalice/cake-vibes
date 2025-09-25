@@ -52,7 +52,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="text-sm font-medium text-muted-foreground">
-              Order #{order.id.slice(0, 8)}
+              Order #{order.id.slice(0, 5)}
             </div>
             <Badge className={`${getStatusColor(order.status)} border-0 whitespace-nowrap`}>
               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
