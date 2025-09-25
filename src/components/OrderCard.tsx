@@ -129,7 +129,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
         {/* Actions */}
         {showActions && onUpdateStatus && <div className="flex flex-wrap gap-2 pt-2">
-            {getStatusActions(order.status).map(action => <Button key={action} variant="outline" size="sm" onClick={() => onUpdateStatus(order.id, action as OrderStatus)} className="capitalize">
+            {getStatusActions(order.status).map(action => <Button key={action} variant="outline" size="sm" onClick={() => onUpdateStatus(order.id, action as OrderStatus)} className="capitalize text-xs">
                 Mark as {action}
               </Button>)}
           </div>}
