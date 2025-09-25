@@ -131,6 +131,33 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
 
     try {
+      // Check minimum delivery days requirement
+      const { data: storeSettings, error: settingsError } = await supabase
+        .from('store_settings')
+        .select('minimum_delivery_days')
+        .limit(1)
+        .single();
+
+      if (settingsError) {
+        console.error('Error fetching store settings:', settingsError);
+      }
+
+      const minimumDeliveryDays = storeSettings?.minimum_delivery_days || 2;
+      
+      if (orderData.delivery_date) {
+        const deliveryDate = new Date(orderData.delivery_date);
+        const today = new Date();
+        const diffTime = deliveryDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < minimumDeliveryDays) {
+          return { 
+            success: false, 
+            error: `Delivery must be at least ${minimumDeliveryDays} day${minimumDeliveryDays !== 1 ? 's' : ''} in advance. Please select a later date.` 
+          };
+        }
+      }
+
       const total = getTotalPrice();
 
       // Create the order

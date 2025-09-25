@@ -39,6 +39,9 @@ const Manager = () => {
   const [storeName, setStoreName] = useState<string>('OhMyCake');
   const [newStoreName, setNewStoreName] = useState<string>('');
   const [isEditingStoreName, setIsEditingStoreName] = useState(false);
+  const [minimumDeliveryDays, setMinimumDeliveryDays] = useState<number>(2);
+  const [newMinimumDeliveryDays, setNewMinimumDeliveryDays] = useState<number>(2);
+  const [isEditingDeliveryDays, setIsEditingDeliveryDays] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
   const [productForm, setProductForm] = useState({
     name: '',
@@ -57,6 +60,7 @@ const Manager = () => {
       fetchProducts();
       fetchStoreName();
       fetchOrders();
+      fetchStoreSettings();
     }
   }, [user, isManager, loading, navigate]);
   const fetchProducts = async () => {
@@ -116,20 +120,30 @@ const Manager = () => {
       toast.error('Failed to update order status');
     }
   };
-  const fetchStoreName = async () => {
+  const fetchStoreSettings = async () => {
     try {
       const {
         data,
         error
-      } = await supabase.from('store_settings').select('store_name').limit(1).single();
+      } = await supabase.from('store_settings').select('store_name, minimum_delivery_days').limit(1).single();
       if (error) throw error;
-      if (data?.store_name) {
-        setStoreName(data.store_name);
-        setNewStoreName(data.store_name);
+      if (data) {
+        if (data.store_name) {
+          setStoreName(data.store_name);
+          setNewStoreName(data.store_name);
+        }
+        if (data.minimum_delivery_days !== null) {
+          setMinimumDeliveryDays(data.minimum_delivery_days);
+          setNewMinimumDeliveryDays(data.minimum_delivery_days);
+        }
       }
     } catch (error) {
-      console.error('Error fetching store name:', error);
+      console.error('Error fetching store settings:', error);
     }
+  };
+
+  const fetchStoreName = async () => {
+    await fetchStoreSettings();
   };
   const updateStoreName = async () => {
     if (!newStoreName.trim()) return;
@@ -146,6 +160,24 @@ const Manager = () => {
     } catch (error) {
       console.error('Error updating store name:', error);
       toast.error('Failed to update store name');
+    }
+  };
+
+  const updateMinimumDeliveryDays = async () => {
+    if (newMinimumDeliveryDays < 1) return;
+    try {
+      const {
+        error
+      } = await supabase.from('store_settings').update({
+        minimum_delivery_days: newMinimumDeliveryDays
+      }).eq('id', (await supabase.from('store_settings').select('id').limit(1).single()).data?.id);
+      if (error) throw error;
+      setMinimumDeliveryDays(newMinimumDeliveryDays);
+      setIsEditingDeliveryDays(false);
+      toast.success('Minimum delivery days updated successfully');
+    } catch (error) {
+      console.error('Error updating minimum delivery days:', error);
+      toast.error('Failed to update minimum delivery days');
     }
   };
   const resetForm = () => {
@@ -556,6 +588,39 @@ const Manager = () => {
                         <Pencil className="h-4 w-4" />
                       </Button>}
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="delivery-days">Minimum Delivery Days</Label>
+                  <div className="flex gap-2 items-center">
+                    <Input 
+                      id="delivery-days" 
+                      type="number" 
+                      min="1" 
+                      max="30"
+                      value={newMinimumDeliveryDays} 
+                      onChange={e => setNewMinimumDeliveryDays(parseInt(e.target.value) || 1)} 
+                      disabled={!isEditingDeliveryDays}
+                      className="w-24"
+                    />
+                    <span className="text-sm text-muted-foreground">days advance notice required</span>
+                    {isEditingDeliveryDays ? <div className="flex gap-2">
+                        <Button onClick={updateMinimumDeliveryDays} size="sm">
+                          Save
+                        </Button>
+                        <Button variant="outline" onClick={() => {
+                      setIsEditingDeliveryDays(false);
+                      setNewMinimumDeliveryDays(minimumDeliveryDays);
+                    }} size="sm">
+                          Cancel
+                        </Button>
+                      </div> : <Button variant="outline" onClick={() => setIsEditingDeliveryDays(true)} size="sm">
+                        <Pencil className="h-4 w-4" />
+                      </Button>}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Customers must order at least {minimumDeliveryDays} day{minimumDeliveryDays !== 1 ? 's' : ''} in advance
+                  </p>
                 </div>
               </CardContent>
             </Card>

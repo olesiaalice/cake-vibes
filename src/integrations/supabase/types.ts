@@ -165,18 +165,21 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          minimum_delivery_days: number
           store_name: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
+          minimum_delivery_days?: number
           store_name?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
+          minimum_delivery_days?: number
           store_name?: string
           updated_at?: string
         }
