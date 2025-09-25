@@ -49,9 +49,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
   };
   return <Card className="shadow-soft hover:shadow-floating transition-all duration-300 w-full overflow-hidden">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mx-0 px-0">
           <div className="flex items-center gap-3">
-            <div className="text-sm font-medium text-muted-foreground">
+            <div className="text-sm font-medium text-muted-foreground px-0">
               Order #{order.id.slice(0, 8)}
             </div>
             <Badge className={`${getStatusColor(order.status)} border-0`}>
