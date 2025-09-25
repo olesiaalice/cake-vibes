@@ -446,7 +446,15 @@ const Manager = () => {
                     Orders will appear here when customers place them.
                   </p>
                 </div> : <div className="space-y-4">
-                  {orders.map(order => (
+                  {orders
+                    .sort((a, b) => {
+                      // First sort by status - delivered orders go to bottom
+                      if (a.status === 'delivered' && b.status !== 'delivered') return 1;
+                      if (a.status !== 'delivered' && b.status === 'delivered') return -1;
+                      // Then sort by created_at descending (newest first)
+                      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                    })
+                    .map(order => (
                     <OrderCard 
                       key={order.id} 
                       order={order} 
