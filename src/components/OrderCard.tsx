@@ -48,7 +48,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
     }
   };
   return <Card className="shadow-soft hover:shadow-floating transition-all duration-300 w-full overflow-hidden">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 sm:px-4 px-[15px]">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="text-sm font-medium text-muted-foreground">
