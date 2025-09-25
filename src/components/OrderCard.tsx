@@ -48,17 +48,17 @@ const OrderCard: React.FC<OrderCardProps> = ({
     }
   };
   return <Card className="shadow-soft hover:shadow-floating transition-all duration-300 w-full overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between mx-0 px-0">
-          <div className="flex items-center gap-2">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="text-sm font-medium text-muted-foreground">
               Order #{order.id.slice(0, 8)}
             </div>
-            <Badge className={`${getStatusColor(order.status)} border-0`}>
+            <Badge className={`${getStatusColor(order.status)} border-0 whitespace-nowrap`}>
               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
             </Badge>
           </div>
-          <div className="text-right">
+          <div className="text-right flex-shrink-0">
             <div className="text-sm text-muted-foreground">
               {format(new Date(order.created_at), 'MMM dd, HH:mm')}
             </div>
