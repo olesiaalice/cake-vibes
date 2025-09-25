@@ -280,81 +280,6 @@ const Manager = () => {
               <p className="text-muted-foreground">Manage your cake store</p>
             </div>
           </div>
-          
-          <Dialog open={isAddingProduct} onOpenChange={setIsAddingProduct}>
-            <DialogTrigger asChild>
-              <Button onClick={() => {
-              resetForm();
-              setIsAddingProduct(true);
-            }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Product
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Add New Product</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddProduct} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input id="name" value={productForm.name} onChange={e => setProductForm(prev => ({
-                    ...prev,
-                    name: e.target.value
-                  }))} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Input id="category" value={productForm.category} onChange={e => setProductForm(prev => ({
-                    ...prev,
-                    category: e.target.value
-                  }))} required />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" value={productForm.description} onChange={e => setProductForm(prev => ({
-                  ...prev,
-                  description: e.target.value
-                }))} required />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price ($)</Label>
-                    <Input id="price" type="number" step="0.01" value={productForm.price} onChange={e => setProductForm(prev => ({
-                    ...prev,
-                    price: e.target.value
-                  }))} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="rating">Rating</Label>
-                    <Input id="rating" type="number" step="0.1" min="0" max="5" value={productForm.rating} onChange={e => setProductForm(prev => ({
-                    ...prev,
-                    rating: e.target.value
-                  }))} required />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="image">Image URL</Label>
-                  <Input id="image" type="url" value={productForm.image} onChange={e => setProductForm(prev => ({
-                  ...prev,
-                  image: e.target.value
-                }))} required />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsAddingProduct(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">Add Product</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -457,6 +382,83 @@ const Manager = () => {
           </TabsContent>
           
           <TabsContent value="products" className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold">Products ({products.length})</h3>
+              <Dialog open={isAddingProduct} onOpenChange={setIsAddingProduct}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => {
+                  resetForm();
+                  setIsAddingProduct(true);
+                }}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Product
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Add New Product</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleAddProduct} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input id="name" value={productForm.name} onChange={e => setProductForm(prev => ({
+                        ...prev,
+                        name: e.target.value
+                      }))} required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <Input id="category" value={productForm.category} onChange={e => setProductForm(prev => ({
+                        ...prev,
+                        category: e.target.value
+                      }))} required />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea id="description" value={productForm.description} onChange={e => setProductForm(prev => ({
+                      ...prev,
+                      description: e.target.value
+                    }))} required />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="price">Price ($)</Label>
+                        <Input id="price" type="number" step="0.01" value={productForm.price} onChange={e => setProductForm(prev => ({
+                        ...prev,
+                        price: e.target.value
+                      }))} required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="rating">Rating</Label>
+                        <Input id="rating" type="number" step="0.1" min="0" max="5" value={productForm.rating} onChange={e => setProductForm(prev => ({
+                        ...prev,
+                        rating: e.target.value
+                      }))} required />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="image">Image URL</Label>
+                      <Input id="image" type="url" value={productForm.image} onChange={e => setProductForm(prev => ({
+                      ...prev,
+                      image: e.target.value
+                    }))} required />
+                    </div>
+
+                    <div className="flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setIsAddingProduct(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit">Add Product</Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {products.map(product => <Card key={product.id} className="overflow-hidden">
                   <div className="aspect-square relative">
