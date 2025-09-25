@@ -411,8 +411,15 @@ const Manager = () => {
                   <p className="text-muted-foreground">
                     Orders will appear here when customers place them.
                   </p>
-                </div> : <div className="grid gap-4">
-                  {orders.map(order => <OrderCard key={order.id} order={order} onUpdateStatus={updateOrderStatus} showActions={true} />)}
+                </div> : <div className="space-y-4">
+                  {orders.map(order => (
+                    <OrderCard 
+                      key={order.id} 
+                      order={order} 
+                      onUpdateStatus={updateOrderStatus} 
+                      showActions={true} 
+                    />
+                  ))}
                 </div>}
             </div>
           </TabsContent>
